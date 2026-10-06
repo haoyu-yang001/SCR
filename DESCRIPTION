@@ -1,0 +1,29 @@
+Package: SCR
+Title: Sequential Covariate-Adjusted Randomization
+Version: 2.0.0
+Authors@R: c(
+    person("Haoyu", "Yang", email = "haoyuyang@hsph.harvard.edu", role = c("aut", "cre")),
+    person("Yichen", "Qin", email = "qinyn@ucmail.uc.edu", role = "aut"),
+    person("Yang", "Li", email = "yang.li@ruc.edu.cn", role = "aut"),
+    person("Feifang", "Hu", role = "aut"),
+    person("Fanglu", "Chen", email = "chenfanglu1031@qq.com", role = "aut",
+           comment = "original implementation in SCR 1.0.0")
+  )
+Description: Implements sequential covariate-adjusted randomization (SCR) for
+    randomized controlled trials in which participants arrive one at a time.
+    SCR separates the covariate imbalance, measured by a modified Mahalanobis
+    distance, from the marginal imbalance (the difference in group sizes) and
+    minimizes them in a hierarchical order. The package allocates whole
+    sequences or single new arrivals, handles continuous and categorical
+    covariates, computes imbalance measures, provides a randomization test
+    for the treatment effect, and includes a multi-arm extension. See Yang,
+    Qin, Li and Hu (2024) <doi:10.1093/biomtc/ujae047>.
+License: GPL (>= 2)
+Encoding: UTF-8
+Depends: R (>= 4.0.0)
+Imports: MASS, stats, utils
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

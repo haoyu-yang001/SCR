@@ -1,0 +1,18 @@
+bibentry(
+  bibtype = "Article",
+  title   = "Sequential Covariate-Adjusted Randomization via Hierarchically Minimizing {M}ahalanobis Distance and Marginal Imbalance",
+  author  = c(person("Haoyu", "Yang"), person("Yichen", "Qin"),
+              person("Yang", "Li"), person("Feifang", "Hu")),
+  journal = "Biometrics",
+  year    = "2024",
+  volume  = "80",
+  number  = "2",
+  pages   = "ujae047",
+  doi     = "10.1093/biomtc/ujae047",
+  textVersion = paste(
+    "Yang, H., Qin, Y., Li, Y., and Hu, F. (2024).",
+    "Sequential covariate-adjusted randomization via hierarchically minimizing",
+    "Mahalanobis distance and marginal imbalance. Biometrics, 80(2), ujae047.",
+    "doi:10.1093/biomtc/ujae047"
+  )
+)

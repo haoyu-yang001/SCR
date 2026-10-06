@@ -1,0 +1,120 @@
+---
+title: "Sequential covariate-adjusted randomization with SCR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Sequential covariate-adjusted randomization with SCR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette shows how to use the **SCR** package, which implements the
+sequential covariate-adjusted randomization of
+
+> Yang, H., Qin, Y., Li, Y., and Hu, F. (2024). Sequential covariate-adjusted
+> randomization via hierarchically minimizing Mahalanobis distance and
+> marginal imbalance. *Biometrics*, 80(2), ujae047.
+
+SCR assigns participants one at a time. Covariate balance, measured by the
+modified Mahalanobis distance
+$\widetilde M(n) = (\sum_{T_i=1} x_i - \sum_{T_i=0} x_i)^\top \mathrm{cov}(x)^{-1}
+(\sum_{T_i=1} x_i - \sum_{T_i=0} x_i)$, is targeted with probability `q1`
+only while the group sizes differ by less than `d`. Otherwise the smaller
+group is favoured with probability `q2`.
+
+```{r}
+library(SCR)
+```
+
+## 1. Allocating a sequence of participants
+
+```{r}
+set.seed(1)
+n <- 500; p <- 10
+x <- MASS::mvrnorm(n, mu = rep(0, p), Sigma = 2 * diag(p))
+
+fit <- SCR(x, d = 5, q1 = 0.75, q2 = 0.85)
+fit
+head(fit$assignment, 20)
+```
+
+`fit$prob` gives the probability $P(T_i = 1)$ used for each participant and
+`fit$rule` the step of Algorithm 1 that was applied.
+
+```{r}
+table(fit$rule)
+```
+
+Compared with complete randomization (CR), the Mahalanobis distance under SCR
+is close to zero, while under CR it follows a scaled $\chi^2_p$
+distribution:
+
+```{r}
+M <- replicate(50, {
+  x <- matrix(rnorm(n * p), n, p)
+  c(SCR = SCR(x)$Mahalanobis_Distance,
+    CR = scr_imbalance(x, rbinom(n, 1, 0.5))[["Mahalanobis_Distance"]])
+})
+rowMeans(M)
+```
+
+## 2. Randomizing participants as they arrive
+
+In a trial each participant must be randomized on arrival. `scr_next()`
+takes the covariates and assignments of the participants already enrolled
+and returns the assignment of the new one.
+
+```{r}
+enrolled_x <- x[1:20, ]
+enrolled_t <- fit$assignment[1:20]
+new_patient <- x[21, ]
+scr_next(new_patient, covariate = enrolled_x, assignment = enrolled_t, d = 5)
+```
+
+With the same random seed, randomizing the participants one by one with
+`scr_next()` gives exactly the same assignments as `SCR()`.
+
+## 3. Continuous and categorical covariates
+
+Categorical covariates enter through the within-stratum imbalance
+$\|D_n\|_2^2$, combined with the modified Mahalanobis distance as
+$W(n) = w \widetilde M(n) + (1 - w)\|D_n\|_2^2$ (Section 2.2 of the paper).
+
+```{r}
+z <- data.frame(sex = sample(c("F", "M"), n, TRUE),
+                site = sample(paste0("site", 1:4), n, TRUE))
+fit_mixed <- SCR(x, categorical = z, d = 5, w = 0.7)
+fit_mixed
+```
+
+## 4. Estimating and testing the treatment effect
+
+We simulate outcomes from $y_i = \mu_1 T_i + \mu_2(1 - T_i) + \sum_j \beta_j
+x_{ij} + \varepsilon_i$ and compare the difference-in-means estimator with
+the regression-adjusted estimator.
+
+```{r}
+tr <- fit$assignment
+y <- 2 * tr + 1 * (1 - tr) + drop(x %*% rep(1, p)) + rnorm(n)
+c(difference_in_means = mean(y[tr == 1]) - mean(y[tr == 0]),
+  regression_adjusted = unname(coef(lm(y ~ tr + x))["tr"]))
+```
+
+`scr_test()` performs a randomization test: it re-runs SCR on the observed
+covariates to obtain the reference distribution of the t statistic.
+
+```{r}
+scr_test(y, x, tr, B = 200, d = 5)
+```
+
+## 5. More than two treatments
+
+`smart()` extends the procedure to $K$ arms, combining the pairwise modified
+Mahalanobis distances by their mean, maximum or median.
+
+```{r}
+smart(x, K = 3, d = 5, q = 0.75, method = "mean")
+```

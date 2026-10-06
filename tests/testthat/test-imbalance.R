@@ -1,0 +1,17 @@
+test_that("imbalance measures match their definitions", {
+  set.seed(1)
+  n <- 40
+  x <- matrix(rnorm(n * 3), n, 3)
+  tr <- rep(0:1, 20)
+  A <- solve(cov(x))
+  u <- colMeans(x[tr == 1, ]) - colMeans(x[tr == 0, ])
+  s <- colSums(x[tr == 1, ]) - colSums(x[tr == 0, ])
+  z <- rep(c("a", "b", "c", "d"), each = 10)
+  im <- scr_imbalance(x, tr, categorical = z, w = 0.3)
+  expect_equal(im[["Mahalanobis_Distance"]], n * drop(t(u) %*% A %*% u))
+  expect_equal(im[["modified_Mahalanobis_Distance"]], drop(t(s) %*% A %*% s))
+  expect_equal(im[["within_stratum"]], 0)
+  expect_equal(im[["W"]], 0.3 * im[["modified_Mahalanobis_Distance"]])
+  expect_equal(im[["marginal"]], 0)
+  expect_true(is.na(scr_imbalance(x, tr)[["within_stratum"]]))
+})
