@@ -15,9 +15,28 @@ hierarchical order. Covariates are balanced only while the group sizes differ by
 
 ## Installation
 
+SCR requires R (>= 4.0.0). Its only dependency outside base R is **MASS**, which ships with R.
+
+Install the development version from GitHub:
+
 ```r
 # install.packages("remotes")
 remotes::install_github("haoyu-yang001/SCR")
+```
+
+To also build the vignette (needs **knitr** and **rmarkdown**):
+
+```r
+remotes::install_github("haoyu-yang001/SCR", build_vignettes = TRUE)
+vignette("SCR")
+```
+
+Or install from a local clone:
+
+```sh
+git clone https://github.com/haoyu-yang001/SCR.git
+R CMD build SCR
+R CMD INSTALL SCR_*.tar.gz
 ```
 
 ## Usage
@@ -48,7 +67,7 @@ scr_test(y, x, fit$assignment, B = 500)
 smart(x, K = 3, d = 5, q = 0.75)
 ```
 
-See `vignette("SCR")` for a full walk-through.
+See `vignette("SCR")` for a full walk-through (install with `build_vignettes = TRUE`).
 
 | Function          | Purpose                                                              |
 |-------------------|----------------------------------------------------------------------|
@@ -66,6 +85,27 @@ See `vignette("SCR")` for a full walk-through.
 * `w`: weight of the Mahalanobis part when categorical covariates are included (default 0.7).
 
 ## Citation
+
+If you use SCR in your work, please cite the paper:
+
+> Yang, H., Qin, Y., Li, Y., and Hu, F. (2024). Sequential covariate-adjusted randomization via hierarchically minimizing Mahalanobis distance and marginal imbalance. *Biometrics*, 80(2), ujae047. https://doi.org/10.1093/biomtc/ujae047
+
+BibTeX:
+
+```bibtex
+@article{yang2024scr,
+  title   = {Sequential Covariate-Adjusted Randomization via Hierarchically Minimizing {M}ahalanobis Distance and Marginal Imbalance},
+  author  = {Yang, Haoyu and Qin, Yichen and Li, Yang and Hu, Feifang},
+  journal = {Biometrics},
+  year    = {2024},
+  volume  = {80},
+  number  = {2},
+  pages   = {ujae047},
+  doi     = {10.1093/biomtc/ujae047}
+}
+```
+
+The same reference is available in R:
 
 ```r
 citation("SCR")
